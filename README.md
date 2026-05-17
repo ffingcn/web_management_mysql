@@ -1,5 +1,7 @@
 # MySQL Web 管理工具
-<img width="1674" height="1006" alt="image" src="https://github.com/user-attachments/assets/0be2aca9-3d9b-4f81-85c6-8aaf72c2498d" />
+<img width="1672" height="1121" alt="image" src="https://github.com/user-attachments/assets/be515131-1155-4618-9178-9082ed2aa234" />
+
+
 一个基于 Flask 的轻量级 MySQL 数据库管理工具，提供直观的 Web 界面用于管理 MySQL 数据库。
 
 ## 功能特性
