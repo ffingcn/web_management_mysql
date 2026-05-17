@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  web_management_mysql:
+    build: .
+    image: ffingcn/web_management_mysql:1.0.0
+    container_name: web_management_mysql
+    restart: always
+    ports:
+      - "5001:5001"
+      - "5002:5002"
+    volumes:
+      - ./conf:/app/conf
+      - ./log:/app/log
+      - ./ssl:/app/ssl
+      - ./img:/app/img
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - web_management_mysql
+    privileged: true
+
+networks:
+  web_management_mysql:
+    driver: bridge

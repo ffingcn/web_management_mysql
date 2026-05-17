@@ -1,0 +1,3066 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="siteTitle">HomeDB 管理</title>
+    <link rel="icon" id="siteFavicon" type="image/png">
+    <style>
+        html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: -webkit-linear-gradient(135deg, #1e3a5f 0%, #0f172a 50%, #1e293b 100%);
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 50%, #1e293b 100%);
+            padding: 20px;
+            min-height: 100vh;
+            height: auto;
+            position: relative;
+            overflow-x: auto;
+            background-attachment: fixed;
+        }
+
+        .glass-box {
+            position: fixed;
+            background: rgba(100, 116, 139, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            animation: float 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.5;
+            }
+            25% {
+                transform: translateY(-15px) rotate(1.5deg);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-8px) rotate(-1deg);
+                opacity: 0.4;
+            }
+            75% {
+                transform: translateY(-20px) rotate(1deg);
+                opacity: 0.6;
+            }
+        }
+
+        .glass-box:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            top: 5%;
+            left: -5%;
+            animation-delay: 0s;
+        }
+
+        .glass-box:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 15%;
+            right: -3%;
+            animation-delay: -2.5s;
+        }
+
+        .glass-box:nth-child(3) {
+            width: 120px;
+            height: 120px;
+            bottom: 20%;
+            left: 10%;
+            animation-delay: -4s;
+        }
+
+        .glass-box:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            bottom: 10%;
+            right: 15%;
+            animation-delay: -1.5s;
+        }
+
+        .glass-box:nth-child(5) {
+            width: 130px;
+            height: 130px;
+            top: 35%;
+            left: 5%;
+            animation-delay: -3s;
+        }
+
+        .glass-box:nth-child(6) {
+            width: 85px;
+            height: 85px;
+            top: 60%;
+            right: 20%;
+            animation-delay: -5s;
+        }
+
+        .container {
+            max-width: 95%;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        h1 {
+            color: #f1f5f9;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .table-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .selection-tag {
+            margin: 0 10px;
+            padding: 4px 8px;
+            font-size: 14px;
+            color: #e2e8f0;
+            background-color: #1e40af;
+            background-color: rgba(59, 130, 246, 0.2);
+            -webkit-background-clip: padding-box;
+            background-clip: padding-box;
+            border-radius: 4px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            line-height: 1.4;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .table-selector select {
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            font-size: 14px;
+            background: rgba(30, 41, 59, 0.8);
+            color: #f1f5f9;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #155724;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #bd2130;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 为所有按钮添加过渡效果 */
+        .btn {
+            transition: all 0.2s ease;
+        }
+
+        .table-scroll-wrapper {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            background: rgba(30, 41, 59, 0.9);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+
+        .table-scroll-wrapper::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .table-scroll-wrapper::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 5px;
+        }
+
+        .table-scroll-wrapper::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 5px;
+        }
+
+        .table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+
+        .table-body-wrapper {
+            overflow-y: auto;
+            max-height: calc(100vh - 445px);
+            overflow-x: auto;
+        }
+
+        .table-body-wrapper::-webkit-scrollbar {
+            width: 8px;
+            height: 10px;
+        }
+
+        .table-body-wrapper::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 4px;
+        }
+
+        .table-body-wrapper::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+
+        .table-body-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+
+        .table-body-wrapper {
+            scrollbar-width: thin;
+            scrollbar-color: #3b82f6 rgba(30, 41, 59, 0.5);
+        }
+
+        table {
+            width: 100%;
+            background: transparent;
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            white-space: nowrap;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        th {
+            background: rgba(59, 130, 246, 0.25);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            font-weight: 600;
+            color: #f1f5f9;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        td {
+            color: #cbd5e1;
+        }
+
+        tr:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(24px);
+            padding: 30px;
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #f1f5f9;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #cbd5e1;
+        }
+
+        #sqlScript::-webkit-scrollbar,
+        #sqlLog::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        #sqlScript::-webkit-scrollbar-track,
+        #sqlLog::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 4px;
+        }
+
+        #sqlScript::-webkit-scrollbar-thumb,
+        #sqlLog::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+
+        #sqlScript::-webkit-scrollbar-thumb:hover,
+        #sqlLog::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+
+        #sqlScript,
+        #sqlLog {
+            scrollbar-width: thin;
+            scrollbar-color: #3b82f6 rgba(30, 41, 59, 0.9);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 6px;
+            font-size: 14px;
+            background: rgba(15, 23, 42, 0.6);
+            color: #f1f5f9;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-actions {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+
+        .table-list {
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .table-list h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #e2e8f0;
+        }
+
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .table-card {
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        .table-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .table-card.active {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .table-card h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #e2e8f0;
+        }
+
+        .table-card p {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* 数据库标签样式 */
+        .database-tabs-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .scroll-button {
+            width: 30px;
+            height: 40px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(30, 41, 59, 0.8);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+            z-index: 10;
+        }
+
+        .scroll-button:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .scroll-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .scroll-left {
+            border-right: none;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .scroll-right {
+            border-left: none;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .database-tabs {
+            flex: 1;
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding: 0 10px;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .database-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .database-tab {
+            padding: 10px 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            background: rgba(30, 41, 59, 0.7);
+            transition: all 0.2s ease;
+            position: relative;
+            border-bottom: 1px solid transparent;
+            white-space: nowrap;
+            flex-shrink: 0;
+            color: #cbd5e1;
+        }
+
+        .database-tab:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: #3b82f6;
+        }
+
+        .database-tab.active {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: #3b82f6;
+            border-bottom-color: rgba(148, 163, 184, 0.1);
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .database-content {
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 0 6px 6px 6px;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        .database-tables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 8px;
+        }
+
+        .table-item {
+            padding: 8px 12px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: rgba(30, 41, 59, 0.7);
+            color: #cbd5e1;
+        }
+
+        .table-item:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .table-item.active {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.25);
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        /* 修复Chrome中按钮不显示title的问题 */
+        button[title] {
+            position: relative;
+        }
+        
+        button[title][disabled] {
+            pointer-events: auto;
+        }
+        
+        button[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            margin-bottom: 5px;
+        }
+        
+        button[title]:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent rgba(0, 0, 0, 0.8) transparent;
+            margin-bottom: -5px;
+            z-index: 1001;
+        }
+        
+        /* 确保按钮内部的元素不会阻止hover事件 */
+        button > * {
+            pointer-events: none;
+        }
+
+        /* 动态加载动画样式 */
+        .loading-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spinner-rotate 1s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes spinner-rotate {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .loading-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3b82f6;
+            animation: dot-pulse 1.4s ease-in-out infinite both;
+        }
+
+        .loading-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .loading-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        .loading-dot:nth-child(3) {
+            animation-delay: 0s;
+        }
+
+        @keyframes dot-pulse {
+            0%, 80%, 100% {
+                transform: scale(0.6);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .loading-text {
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .loading-ring {
+            width: 22px;
+            height: 22px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .loading-ring::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 2px solid rgba(148, 163, 184, 0.1);
+            border-radius: 50%;
+        }
+
+        .loading-ring::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 2px solid transparent;
+            border-top-color: #3b82f6;
+            border-right-color: #3b82f6;
+            border-radius: 50%;
+            animation: ring-spin 0.8s linear infinite;
+        }
+
+        @keyframes ring-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 分页样式 */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .pagination-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(30, 41, 59, 0.8);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn.active {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #94a3b8;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .pagination-dots {
+            color: #64748b;
+            padding: 0 5px;
+        }
+
+        /* 设置弹窗样式 */
+        .settings-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .settings-tab {
+            padding: 10px 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 4px 4px 0 0;
+            background: rgba(30, 41, 59, 0.7);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border-bottom: 2px solid transparent;
+            color: #cbd5e1;
+        }
+
+        .settings-tab:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: #3b82f6;
+        }
+
+        .settings-tab.active {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: #3b82f6;
+            border-bottom-color: #3b82f6;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .settings-content {
+            height: 320px;
+            overflow-y: auto;
+        }
+
+        .settings-panel {
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 确认弹窗样式 */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 10001;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .confirm-modal.show {
+            display: flex;
+        }
+
+        .confirm-content {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 16px;
+            padding: 30px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: scaleIn 0.25s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .confirm-icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #f59e0b;
+        }
+
+        .confirm-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f1f5f9;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .confirm-message {
+            font-size: 14px;
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn.confirm {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .confirm-btn.confirm:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .confirm-btn.cancel {
+            background: rgba(100, 116, 139, 0.3);
+            color: #cbd5e1;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .confirm-btn.cancel:hover {
+            background: rgba(100, 116, 139, 0.4);
+        }
+
+        /* 消息提示样式 */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid #22c55e;
+        }
+
+        .toast.error {
+            border-left-color: #ef4444;
+        }
+
+        .toast.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .toast.info {
+            border-left-color: #06b6d4;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .toast-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .toast-success .toast-icon {
+            color: #28a745;
+        }
+
+        .toast-error .toast-icon {
+            color: #dc3545;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 14px;
+            color: #e2e8f0;
+            margin: 0;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #999;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .toast-close:hover {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .history-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .history-modal.show {
+            display: flex;
+        }
+
+        .history-content {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 16px;
+            padding: 25px;
+            width: 950px;
+            max-width: 95%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .history-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin: 0;
+        }
+
+        .history-close {
+            width: 32px;
+            height: 32px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(30, 41, 59, 0.8);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+        }
+
+        .history-close:hover {
+            background: rgba(220, 53, 69, 0.2);
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table td {
+            padding: 8px 10px;
+            color: #cbd5e1;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .history-table td.history-col-time {
+            width: 150px;
+            text-align: left;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .history-table td.history-col-status {
+            width: 70px;
+            text-align: center;
+        }
+
+        .history-table td.history-col-action {
+            width: 70px;
+            text-align: center;
+        }
+
+        .history-table td.history-col-record {
+            width: auto;
+        }
+
+        .history-table tr:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .history-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .history-status.success {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+
+        .history-status.error {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+
+        .history-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .history-btn {
+            padding: 8px 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(30, 41, 59, 0.8);
+            color: #cbd5e1;
+        }
+
+        .history-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            color: #e2e8f0;
+        }
+
+        .history-btn.danger:hover {
+            background: rgba(220, 53, 69, 0.2);
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        #historyList {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        #historyList::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        #historyList::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 4px;
+        }
+
+        #historyList::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+
+        #historyList::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+
+        #historyList {
+            scrollbar-width: thin;
+            scrollbar-color: #3b82f6 rgba(30, 41, 59, 0.9);
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-box"></div>
+    <div class="glass-box"></div>
+    <div class="glass-box"></div>
+    <div class="glass-box"></div>
+    <div class="glass-box"></div>
+    <div class="glass-box"></div>
+    
+    <!-- 确认弹窗 -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-content">
+            <div class="confirm-icon" id="confirmIcon">⚠️</div>
+            <div class="confirm-title" id="confirmTitle">提示</div>
+            <div class="confirm-message" id="confirmMessage">确定要执行此操作吗？</div>
+            <div class="confirm-actions">
+                <button class="confirm-btn cancel" onclick="closeConfirmModal()">取消</button>
+                <button class="confirm-btn confirm" onclick="executeConfirmCallback()">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <div class="container">
+        <!-- <h1 id="siteHeading">HomeDB 管理</h1> -->
+
+        <div class="table-list" id="databaseList">
+            <h2>数据库</h2>
+            <div class="database-tabs-container">
+                <button class="scroll-button scroll-left" onclick="scrollTabs(-1)">‹</button>
+                <div class="database-tabs" id="databaseTabs">
+                    <!-- 数据库标签将通过 JavaScript 动态生成 -->
+                </div>
+                <button class="scroll-button scroll-right" onclick="scrollTabs(1)">›</button>
+            </div>
+            <div class="database-content" id="databaseContent">
+                <div class="database-tables-grid" id="tablesContainer">
+                    <!-- 表将通过 JavaScript 动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="table-selector">
+                <span style="font-weight: 500; color: #cbd5e1;">当前选择：</span>
+                <span id="currentDatabase" class="selection-tag">未选择</span>
+                <span style="color: #64748b;">|</span>
+                <span id="currentTable" class="selection-tag">未选择</span>
+            </div>
+            <div style="flex: 1; text-align: center; font-size: 14px; color: #94a3b8; padding: 0 20px;">
+                <div id="recordCount">记录数量：0</div>
+                <div id="filterConditions" style="font-size: 12px; color: #64748b; margin-top: 2px;"></div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn btn-primary" id="addButton" onclick="openAddModal()" disabled title="添加记录" style="font-size: 20px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 6px;">+</button>
+                <button class="btn btn-danger" id="batchDeleteButton" onclick="batchDelete()" disabled title="批量删除" style="font-size: 20px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 6px;">−</button>
+                <button class="btn btn-success" id="refreshButton" onclick="refreshData()" title="刷新数据" style="font-size: 18px; position: relative; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 6px;">
+                    <span id="refreshIcon" style="position: relative; z-index: 1; width: 100%; text-align: center; color: white;">↻</span>
+                    <span id="refreshSpinner" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite; z-index: 2;"></span>
+                </button>
+                <button class="btn btn-secondary" id="historyButton" onclick="openHistoryModal()" title="历史记录" style="font-size: 18px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 6px; background: #fd7e14; border-color: #fd7e14;">☰</button>
+                <div style="width: 8px;"></div>
+                <button class="btn btn-secondary" onclick="openSqlModal()" title="SQL脚本" style="font-size: 16px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 6px; background: #868e96; border-color: #868e96;">⌘</button>
+                <button class="btn btn-secondary" onclick="openSettingsModal()" title="设置" style="font-size: 24px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 6px; background: #868e96; border-color: #868e96;">⚙</button>
+                <button class="btn btn-secondary" onclick="logout()" title="退出" style="font-size: 16px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 6px; background: #868e96; border-color: #868e96;">⇨</button>
+            </div>
+        </div>
+
+        <div class="table-scroll-wrapper" id="tableScrollWrapper">
+            <div class="table-body-wrapper" id="tableBodyWrapper">
+                <table id="dataTable" style="display: none;">
+                    <thead id="tableHeader">
+                        <!-- 表头将通过 JavaScript 动态生成 -->
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- 表体将通过 JavaScript 动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            暂无数据，请点击"添加新记录"按钮创建
+        </div>
+
+        <!-- 分页容器 -->
+        <div id="paginationContainer" class="pagination-container" style="display: none;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; color: #94a3b8;">每页：</span>
+                <select id="pageSizeSelector" onchange="changePageSize(this.value)" style="padding: 6px 10px; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 6px; font-size: 14px; background: rgba(30, 41, 59, 0.8); color: #f1f5f9; backdrop-filter: blur(10px);">
+                    <option value="10">10条</option>
+                    <option value="20">20条</option>
+                    <option value="50">50条</option>
+                    <option value="100">100条</option>
+                </select>
+            </div>
+            <button class="pagination-btn" id="prevPage" onclick="changePage(currentPage - 1)" disabled title="上一页">‹</button>
+            <div class="pagination-info" id="paginationInfo">第 1/1 页</div>
+            <button class="pagination-btn" id="nextPage" onclick="changePage(currentPage + 1)" disabled title="下一页">›</button>
+        </div>
+
+        <div id="noTableSelected" class="empty-state">
+            请从上方选择一个表开始管理
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div id="historyModal" class="history-modal">
+        <div class="history-content">
+            <div class="history-header">
+                <h3 class="history-title">操作历史记录</h3>
+                <button class="history-close" onclick="closeHistoryModal()">×</button>
+            </div>
+            <div id="historyList">
+                <table class="history-table">
+                    <tbody id="historyTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="history-pagination">
+                <button class="history-btn" onclick="exportHistory()">导出历史</button>
+                <button class="history-btn danger" onclick="clearHistory()">清空历史</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="modalTitle">添加记录</h2>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div id="formFields">
+                    <!-- 表单字段将通过 JavaScript 动态生成 -->
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-success">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="filterModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">过滤条件</h2>
+            <div class="form-group">
+                <label for="filterField">请输入 <span id="filterFieldName"></span> 字段的过滤条件：</label>
+                <input type="text" id="filterField" class="form-control" placeholder="输入关键词">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeFilterModal()">取消</button>
+                <button type="button" class="btn btn-success" onclick="applyFilterFromModal()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content" style="width: 600px;">
+            <h2 class="modal-title">系统设置</h2>
+            
+            <div class="settings-tabs">
+                <button class="settings-tab active" onclick="switchSettingsTab('login')">站点设置</button>
+                <button class="settings-tab" onclick="switchSettingsTab('database')">数据库设置</button>
+                <button class="settings-tab" onclick="switchSettingsTab('server')">端口设置</button>
+                <button class="settings-tab" onclick="switchSettingsTab('page')">默认设置</button>
+                
+            </div>
+
+            <div class="settings-content">
+                <div id="loginSettings" class="settings-panel">
+                    <div class="form-group">
+                        <label for="settingSiteName">网站名称</label>
+                        <input type="text" id="settingSiteName" placeholder="请输入网站名称">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingSiteLogo">网站Logo URL</label>
+                        <input type="text" id="settingSiteLogo" placeholder="URL 或 本地:./img/logo.png">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingLoginUsername">登录用户名</label>
+                        <input type="text" id="settingLoginUsername" placeholder="请输入用户名">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingLoginPassword">登录密码</label>
+                        <input type="text" id="settingLoginPassword" placeholder="请输入密码">
+                    </div>
+                </div>
+
+                <div id="databaseSettings" class="settings-panel" style="display: none;">
+                    <div class="form-group">
+                        <label for="settingDbHost">数据库主机</label>
+                        <input type="text" id="settingDbHost" placeholder="请输入数据库主机地址">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingDbPort">数据库端口</label>
+                        <input type="number" id="settingDbPort" placeholder="请输入数据库端口">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingDbUser">数据库用户名</label>
+                        <input type="text" id="settingDbUser" placeholder="请输入数据库用户名">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingDbPassword">数据库密码</label>
+                        <input type="text" id="settingDbPassword" placeholder="请输入数据库密码">
+                    </div>
+                </div>
+
+                <div id="serverSettings" class="settings-panel" style="display: none;">
+                    <div class="form-group">
+                        <label for="settingHttpPort">HTTP端口</label>
+                        <input type="number" id="settingHttpPort" placeholder="如：5001">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingHttpsPort">HTTPS端口</label>
+                        <input type="number" id="settingHttpsPort" placeholder="如：5002">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingSslCert">SSL证书路径</label>
+                        <input type="text" id="settingSslCert" placeholder="如：./ssl/server.crt">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingSslKey">SSL私钥路径</label>
+                        <input type="text" id="settingSslKey" placeholder="如：./ssl/server.key">
+                    </div>
+                </div>
+                
+                <div id="pageSettings" class="settings-panel" style="display: none;">
+                    <div class="form-group">
+                        <label for="settingDefaultDatabase">默认展示库</label>
+                        <input type="text" id="settingDefaultDatabase" placeholder="如：my_database">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingDefaultTable">默认展示表</label>
+                        <input type="text" id="settingDefaultTable" placeholder="如：my_table">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingDefaultPageSize">默认展示页面记录数量</label>
+                        <select id="settingDefaultPageSize" style="padding: 6px 10px; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 6px; font-size: 14px; background: rgba(30, 41, 59, 0.8); color: #f1f5f9; backdrop-filter: blur(10px);">
+                            <option value="10">10条</option>
+                            <option value="20">20条</option>
+                            <option value="50">50条</option>
+                            <option value="100">100条</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">取消</button>
+                <button type="button" class="btn btn-success" onclick="saveSettings()">保存设置</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sqlModal" class="modal">
+        <div class="modal-content" style="width: 800px; max-width: 90%; max-height: 80vh; overflow-y: auto;">
+            <h2 class="modal-title">SQL脚本执行</h2>
+            <div class="form-group">
+                <label for="sqlScript">SQL脚本：</label>
+                <textarea id="sqlScript" style="width: 100%; padding: 10px; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 6px; font-size: 14px; resize: vertical; min-height: 120px; max-height: 200px; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; overflow-y: auto; background: rgba(15, 23, 42, 0.8); color: #f1f5f9;"></textarea>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <button class="btn btn-primary" onclick="executeSql()">执行SQL</button>
+                <button class="btn btn-secondary" onclick="clearSql()" style="margin-left: 10px;">清空</button>
+                <button class="btn btn-secondary" onclick="closeSqlModal()" style="margin-left: 10px;">关闭</button>
+            </div>
+            <div class="form-group">
+                <label for="sqlLog">执行日志：</label>
+                <div id="sqlLog" style="width: 100%; padding: 10px; border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 6px; font-size: 14px; min-height: 150px; max-height: 300px; background: rgba(15, 23, 42, 0.8); font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; white-space: pre-wrap; overflow: auto; color: #e2e8f0;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTable = '';
+        let currentDatabase = '';
+        let tableStructure = [];
+        let confirmCallback = null;
+        let originalServerConfig = null;
+        
+        // 请求取消控制器 - 用于处理快速切换表时取消未完成的请求
+        let tableDataAbortController = null;
+        let tableStructureAbortController = null;
+        
+        // 分页相关变量
+        let currentPage = 1;
+        let pageSize = 10;
+        let totalRecords = 0;
+        let totalPages = 0;
+        
+        // 页面配置
+        let pageConfig = {
+            default_database: '',
+            default_table: '',
+            default_page_size: 10
+        };
+        
+        // 本地缓存
+        const databaseCache = {};
+        const tableStructureCache = {};
+        
+        // 数据和过滤相关变量
+        let currentData = [];
+        let filterConditions = [];
+        let currentSortField = '';
+        let currentSortOrder = '';
+        
+        // 延迟加载动画相关变量
+        let loadingTimeoutIds = {};
+        const LOADING_DELAY = 500; // 500ms 延迟
+        
+        // 延迟显示加载状态的辅助函数
+        function showLoadingWithDelay(containerId, loadingHtml, placeholderHtml) {
+            // 清除之前的超时
+            if (loadingTimeoutIds[containerId]) {
+                clearTimeout(loadingTimeoutIds[containerId]);
+            }
+            
+            // 先显示占位符（不显示加载动画）
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = placeholderHtml;
+            }
+            
+            // 延迟显示加载动画
+            loadingTimeoutIds[containerId] = setTimeout(() => {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.innerHTML = loadingHtml;
+                }
+                delete loadingTimeoutIds[containerId];
+            }, LOADING_DELAY);
+        }
+        
+        // 取消延迟加载动画显示
+        function cancelLoadingDelay(containerId) {
+            if (loadingTimeoutIds[containerId]) {
+                clearTimeout(loadingTimeoutIds[containerId]);
+                delete loadingTimeoutIds[containerId];
+            }
+        }
+
+        function checkScrollbar() {
+            const wrapper = document.querySelector('.table-scroll-wrapper');
+            if (wrapper) {
+                const table = wrapper.querySelector('table');
+                if (table) {
+                    const hasScroll = table.scrollWidth > wrapper.clientWidth;
+                    wrapper.classList.toggle('has-scroll', hasScroll);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/site-config');
+                const config = await response.json();
+
+                if (config.site && config.site.name) {
+                    document.getElementById('siteTitle').textContent = config.site.name;
+                }
+
+                if (config.site && config.site.logo) {
+                    document.getElementById('siteFavicon').href = config.site.logo;
+                }
+            } catch (error) {
+                console.error('加载站点配置失败:', error);
+            }
+
+            checkScrollbar();
+            window.addEventListener('resize', checkScrollbar);
+        });
+
+        // 确认弹窗函数
+        function showConfirmModal(title, message, callback, icon = '⚠️') {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmIcon').textContent = icon;
+            confirmCallback = callback;
+            document.getElementById('confirmModal').classList.add('show');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('show');
+            confirmCallback = null;
+        }
+
+        function executeConfirmCallback() {
+            if (confirmCallback) {
+                confirmCallback();
+            }
+            closeConfirmModal();
+        }
+
+        // 消息提示函数
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span class="toast-icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+                <span class="toast-message">${message}</span>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        async function loadDatabases() {
+            // 加载页面配置
+            try {
+                const configResponse = await fetch('/api/config');
+                const config = await configResponse.json();
+                pageConfig = config.page || {
+                    default_database: '',
+                    default_table: '',
+                    default_page_size: 10
+                };
+                pageSize = pageConfig.default_page_size || 10;
+                // 更新页面大小选择器
+                const pageSizeSelector = document.getElementById('pageSizeSelector');
+                if (pageSizeSelector) {
+                    pageSizeSelector.value = String(pageSize);
+                }
+            } catch (error) {
+                console.error('加载配置失败:', error);
+            }
+            
+            const databaseTabs = document.getElementById('databaseTabs');
+            const tablesContainer = document.getElementById('tablesContainer');
+            
+            // 使用延迟显示加载状态
+            showLoadingWithDelay(
+                'databaseTabs',
+                '<div class="loading-container"><div class="loading-ring"></div><span class="loading-text">正在加载数据库列表...</span></div>',
+                '<div style="padding: 20px; color: #94a3b8; text-align: center;"></div>'
+            );
+            tablesContainer.innerHTML = '<div style="padding: 40px; color: #94a3b8; text-align: center;">请选择数据库</div>';
+            
+            fetch('/api/databases')
+                .then(response => response.json())
+                .then(databases => {
+                    // 取消延迟加载动画
+                    cancelLoadingDelay('databaseTabs');
+                    databaseTabs.innerHTML = '';
+                    
+                    databases.forEach(db => {
+                        // 创建数据库标签
+                        const tab = document.createElement('div');
+                        tab.className = 'database-tab';
+                        tab.textContent = db;
+                        tab.onclick = () => selectDatabase(db);
+                        databaseTabs.appendChild(tab);
+                    });
+                    
+                    // 选择默认数据库
+                    if (databases.length > 0) {
+                        let selectedDb = databases[0];
+                        if (pageConfig.default_database && databases.includes(pageConfig.default_database)) {
+                            selectedDb = pageConfig.default_database;
+                        }
+                        selectDatabase(selectedDb);
+                    } else {
+                        tablesContainer.innerHTML = '<div style="padding: 40px; color: #94a3b8; text-align: center;">未找到数据库</div>';
+                    }
+                    
+                    // 检查滚动按钮状态
+                    checkScrollButtons();
+                })
+                .catch(error => {
+                    cancelLoadingDelay('databaseTabs');
+                    console.error('Error:', error);
+                    databaseTabs.innerHTML = '<div style="padding: 20px; color: #ef4444; text-align: center;">加载数据库列表失败</div>';
+                    showToast('加载数据库列表失败', 'error');
+                });
+        }
+
+        function scrollTabs(direction) {
+            const tabsContainer = document.getElementById('databaseTabs');
+            const scrollAmount = 200; // 每次滚动的像素数
+            
+            tabsContainer.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+            
+            // 延迟检查按钮状态，因为滚动是平滑的
+            setTimeout(checkScrollButtons, 300);
+        }
+
+        function checkScrollButtons() {
+            const tabsContainer = document.getElementById('databaseTabs');
+            const scrollLeftBtn = document.querySelector('.scroll-left');
+            const scrollRightBtn = document.querySelector('.scroll-right');
+            
+            if (tabsContainer.scrollLeft === 0) {
+                scrollLeftBtn.style.display = 'none';
+            } else {
+                scrollLeftBtn.style.display = 'flex';
+            }
+            
+            if (tabsContainer.scrollLeft >= (tabsContainer.scrollWidth - tabsContainer.clientWidth - 10)) {
+                scrollRightBtn.style.display = 'none';
+            } else {
+                scrollRightBtn.style.display = 'flex';
+            }
+        }
+
+        function selectDatabase(database) {
+            currentDatabase = database;
+            
+            // 更新标签状态
+            document.querySelectorAll('.database-tab').forEach(tab => {
+                if (tab.textContent === database) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // 更新当前选择显示
+            document.getElementById('currentDatabase').textContent = database;
+            document.getElementById('currentTable').textContent = '未选择';
+            
+            // 加载表列表
+            loadTablesForDatabase(database);
+        }
+
+        function loadTablesForDatabase(database) {
+            const tablesContainer = document.getElementById('tablesContainer');
+            if (!tablesContainer) return;
+            
+            // 使用延迟显示加载状态
+            showLoadingWithDelay(
+                'tablesContainer',
+                '<div class="loading-container"><div class="loading-spinner"></div><span class="loading-text">正在加载表列表...</span></div>',
+                '<div style="padding: 40px; color: #94a3b8; text-align: center;">加载中...</div>'
+            );
+            
+            fetch(`/api/tables?database=${encodeURIComponent(database)}`)
+                .then(response => response.json())
+                .then(tables => {
+                    // 取消延迟加载动画
+                    cancelLoadingDelay('tablesContainer');
+                    tablesContainer.innerHTML = '';
+                    if (tables.length === 0) {
+                        tablesContainer.innerHTML = '<div style="padding: 40px; color: #94a3b8; text-align: center;">该数据库中没有表</div>';
+                        return;
+                    }
+                    tables.forEach(table => {
+                        const tableItem = document.createElement('div');
+                        tableItem.className = 'table-item';
+                        tableItem.onclick = () => selectTableWithDatabase(database, table);
+                        tableItem.textContent = table;
+                        tablesContainer.appendChild(tableItem);
+                    });
+                    
+                    // 如果是默认数据库，选择默认表
+                    if (pageConfig.default_database === database && pageConfig.default_table && tables.includes(pageConfig.default_table)) {
+                        selectTableWithDatabase(database, pageConfig.default_table);
+                    }
+                })
+                .catch(error => {
+                    cancelLoadingDelay('tablesContainer');
+                    console.error('Error:', error);
+                    tablesContainer.innerHTML = '<div style="padding: 40px; color: #ef4444; text-align: center;">加载表列表失败</div>';
+                    showToast('加载表列表失败', 'error');
+                });
+        }
+
+        function selectTableWithDatabase(database, tableName) {
+            currentDatabase = database;
+            currentTable = tableName;
+            
+            // 更新当前选择显示
+            document.getElementById('currentDatabase').textContent = database;
+            document.getElementById('currentTable').textContent = tableName;
+            
+            // 更新表项状态
+            document.querySelectorAll('.table-item').forEach(item => {
+                if (item.textContent === tableName) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // 显示加载状态（使用延迟）
+            const tableBody = document.getElementById('tableBody');
+            const table = document.getElementById('dataTable');
+            const emptyState = document.getElementById('emptyState');
+            const paginationContainer = document.getElementById('paginationContainer');
+            
+            // 先显示空白占位
+            tableBody.innerHTML = '<tr><td colspan="100%" style="padding: 40px; color: #94a3b8; text-align: center;"></td></tr>';
+            table.style.display = 'table';
+            emptyState.style.display = 'none';
+            paginationContainer.style.display = 'none';
+            document.getElementById('recordCount').textContent = '记录数量：加载中...';
+            
+            // 设置延迟显示加载动画
+            showLoadingWithDelay(
+                'tableBody',
+                '<tr><td colspan="100%" style="padding: 40px;"><div class="loading-container"><div class="loading-spinner"></div><span class="loading-text">正在加载数据...</span></div></td></tr>',
+                '<tr><td colspan="100%" style="padding: 40px; color: #94a3b8; text-align: center;"></td></tr>'
+            );
+            
+            // 加载表数据
+            loadTableData(tableName);
+        }
+        
+        function selectTable(tableName) {
+            currentTable = tableName;
+            
+            // 更新当前选择显示
+            document.getElementById('currentTable').textContent = tableName;
+            
+            // 更新表项状态
+            document.querySelectorAll('.table-item').forEach(item => {
+                if (item.textContent === tableName) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // 显示加载状态（使用延迟）
+            const tableBody = document.getElementById('tableBody');
+            const table = document.getElementById('dataTable');
+            const emptyState = document.getElementById('emptyState');
+            const paginationContainer = document.getElementById('paginationContainer');
+            
+            // 先显示空白占位
+            tableBody.innerHTML = '<tr><td colspan="100%" style="padding: 40px; color: #94a3b8; text-align: center;"></td></tr>';
+            table.style.display = 'table';
+            emptyState.style.display = 'none';
+            paginationContainer.style.display = 'none';
+            document.getElementById('recordCount').textContent = '记录数量：加载中...';
+            
+            // 设置延迟显示加载动画
+            showLoadingWithDelay(
+                'tableBody',
+                '<tr><td colspan="100%" style="padding: 40px;"><div class="loading-container"><div class="loading-spinner"></div><span class="loading-text">正在加载数据...</span></div></td></tr>',
+                '<tr><td colspan="100%" style="padding: 40px; color: #94a3b8; text-align: center;"></td></tr>'
+            );
+            
+            loadTableData(tableName);
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        function loadTableData(tableName) {
+            if (!tableName || !currentDatabase) return;
+            
+            currentTable = tableName;
+            currentPage = 1;
+            document.getElementById('addButton').disabled = false;
+            document.getElementById('batchDeleteButton').disabled = false;
+            document.getElementById('refreshButton').disabled = false;
+            document.getElementById('noTableSelected').style.display = 'none';
+            
+            // 取消之前未完成的请求，避免竞态条件
+            if (tableStructureAbortController) {
+                tableStructureAbortController.abort();
+            }
+            if (tableDataAbortController) {
+                tableDataAbortController.abort();
+            }
+            
+            // 检查缓存
+            const cacheKey = `${currentDatabase}_${tableName}`;
+            if (tableStructureCache[cacheKey]) {
+                tableStructure = tableStructureCache[cacheKey];
+                renderTableHeader(tableStructure);
+                loadTableDataWithPagination(tableName, 1);
+                return;
+            }
+            
+            // 创建新的请求控制器
+            tableStructureAbortController = new AbortController();
+            
+            fetch(`/api/table/${tableName}/structure?database=${encodeURIComponent(currentDatabase)}`, {
+                signal: tableStructureAbortController.signal
+            })
+                .then(response => {
+                    if (response.aborted) return;
+                    return response.json();
+                })
+                .then(structure => {
+                    if (!structure) return;
+                    tableStructure = structure;
+                    // 缓存表结构
+                    tableStructureCache[cacheKey] = structure;
+                    
+                    renderTableHeader(structure);
+                    loadTableDataWithPagination(tableName, 1);
+                })
+                .catch(error => {
+                    if (error.name !== 'AbortError') {
+                        console.error('Error:', error);
+                        showToast('加载表结构失败', 'error');
+                    }
+                });
+        }
+        
+        function renderTableHeader(structure) {
+            const tableHeader = document.getElementById('tableHeader');
+            tableHeader.innerHTML = '';
+            
+            const headerRow = document.createElement('tr');
+            
+            // 添加行号列
+            const rowNumberTh = document.createElement('th');
+            rowNumberTh.textContent = 'No.';
+            rowNumberTh.style.width = '60px';
+            rowNumberTh.style.textAlign = 'center';
+            headerRow.appendChild(rowNumberTh);
+            
+            // 添加复选框列
+            const checkboxTh = document.createElement('th');
+            checkboxTh.innerHTML = '<input type="checkbox" id="selectAll" onchange="toggleSelectAll()">';
+            headerRow.appendChild(checkboxTh);
+            
+            structure.forEach(field => {
+                const th = document.createElement('th');
+                th.style.whiteSpace = 'nowrap';
+                
+                const fieldName = field.comment && field.comment.trim() ? field.comment : field.field;
+                const displayName = fieldName.length > 10 ? fieldName.substring(0, 10) + '...' : fieldName;
+                
+                th.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span title="${fieldName}">${displayName}</span>
+                        <div style="position: relative;">
+                            <button onclick="toggleFieldMenu('menu_${field.field}')" style="background: none; border: none; cursor: pointer; font-size: 14px; color: #94a3b8; padding: 2px 4px; border-radius: 2px;">☰</button>
+                            <div id="menu_${field.field}" style="display: none; position: absolute; top: 0; left: 100%; background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(24px); border: 1px solid rgba(148, 163, 184, 0.15); border-radius: 8px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); z-index: 1000; padding: 5px 0; min-width: 100px;">
+                                <button onclick="sortTable('${field.field}', 'asc'); toggleFieldMenu('menu_${field.field}')" style="display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: none; cursor: pointer; font-size: 13px; color: #cbd5e1;">↑ 升序</button>
+                                <button onclick="sortTable('${field.field}', 'desc'); toggleFieldMenu('menu_${field.field}')" style="display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: none; cursor: pointer; font-size: 13px; color: #cbd5e1;">↓ 降序</button>
+                                <button onclick="openFilterModal('${field.field}'); toggleFieldMenu('menu_${field.field}')" style="display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: none; cursor: pointer; font-size: 13px; color: #cbd5e1;">⊞ 过滤</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                headerRow.appendChild(th);
+            });
+            
+            // 添加操作列
+            const actionTh = document.createElement('th');
+            actionTh.textContent = '操作';
+            headerRow.appendChild(actionTh);
+            tableHeader.appendChild(headerRow);
+        }
+        
+        function loadTableDataWithPagination(tableName, page) {
+            if (!tableName || !currentDatabase) return;
+            
+            tableDataAbortController = new AbortController();
+            
+            const url = `/api/table/${tableName}/data?database=${encodeURIComponent(currentDatabase)}&page=${page}&pageSize=${pageSize}`;
+            
+            fetch(url, {
+                signal: tableDataAbortController.signal
+            })
+                .then(response => {
+                    if (response.aborted) return;
+                    return response.json();
+                })
+                .then(result => {
+                    // 取消延迟加载动画
+                    cancelLoadingDelay('tableBody');
+                    
+                    if (!result) return;
+                    
+                    const data = result.data || [];
+                    totalRecords = result.total || 0;
+                    currentPage = result.page || 1;
+                    pageSize = result.pageSize || 20;
+                    totalPages = Math.ceil(totalRecords / pageSize);
+                    
+                    // 更新记录数量显示
+                    document.getElementById('recordCount').textContent = `记录数量：${totalRecords}`;
+                    document.getElementById('filterConditions').textContent = '';
+                    
+                    // 更新分页信息
+                    updatePagination(totalRecords, totalPages);
+                    
+                    // 保存数据到currentData用于排序
+                    currentData = data;
+                    
+                    // 渲染当前页数据
+                    renderTableData(data);
+                })
+                .catch(error => {
+                    // 取消延迟加载动画
+                    cancelLoadingDelay('tableBody');
+                    
+                    if (error.name !== 'AbortError') {
+                        console.error('Error:', error);
+                        showToast('加载数据失败', 'error');
+                        document.getElementById('recordCount').textContent = '记录数量：0';
+                    }
+                });
+        }
+
+        function openAddModal() {
+            if (!currentTable) return;
+            
+            document.getElementById('modalTitle').textContent = `添加记录到 ${currentTable}`;
+            document.getElementById('editId').value = '';
+            
+            // 生成表单字段
+            const formFields = document.getElementById('formFields');
+            formFields.innerHTML = '';
+            
+            tableStructure.forEach(field => {
+                // 跳过 id 字段（自增）
+                if (field.field === 'id' && field.extra.includes('auto_increment')) {
+                    return;
+                }
+                
+                const formGroup = document.createElement('div');
+                formGroup.className = 'form-group';
+                
+                const label = document.createElement('label');
+                label.htmlFor = `edit${field.field.charAt(0).toUpperCase() + field.field.slice(1)}`;
+                label.textContent = field.comment && field.comment.trim() ? field.comment : field.field;
+                if (field.null === 'NO' && field.default === null) {
+                    label.textContent += ' *';
+                }
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `edit${field.field.charAt(0).toUpperCase() + field.field.slice(1)}`;
+                if (field.null === 'NO' && field.default === null) {
+                    input.required = true;
+                }
+                
+                formGroup.appendChild(label);
+                formGroup.appendChild(input);
+                formFields.appendChild(formGroup);
+            });
+            
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        function editRecord(id, primaryKeyField = 'id') {
+            if (!currentTable) return;
+            
+            document.getElementById('modalTitle').textContent = `编辑记录`;
+            document.getElementById('editId').value = id;
+            document.getElementById('editId').dataset.primaryKeyField = primaryKeyField;
+            
+            // 从当前已加载的数据中查找记录
+            const item = currentData.find(d => d[primaryKeyField] == id);
+            
+            if (item) {
+                // 生成表单字段
+                const formFields = document.getElementById('formFields');
+                formFields.innerHTML = '';
+                
+                tableStructure.forEach(field => {
+                    const formGroup = document.createElement('div');
+                    formGroup.className = 'form-group';
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `edit${field.field.charAt(0).toUpperCase() + field.field.slice(1)}`;
+                    label.textContent = field.comment && field.comment.trim() ? field.comment : field.field;
+                    if (field.null === 'NO' && field.default === null) {
+                        label.textContent += ' *';
+                    }
+                    
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = `edit${field.field.charAt(0).toUpperCase() + field.field.slice(1)}`;
+                    input.value = item[field.field] !== undefined ? item[field.field] : '';
+                    if (field.null === 'NO' && field.default === null) {
+                        input.required = true;
+                    }
+                    
+                    formGroup.appendChild(label);
+                    formGroup.appendChild(input);
+                    formFields.appendChild(formGroup);
+                });
+                
+                document.getElementById('editModal').classList.add('show');
+            } else {
+                // 如果当前页没有找到，从服务器加载完整数据
+                fetch(`/api/table/${currentTable}/data?database=${encodeURIComponent(currentDatabase)}&pageSize=1000`)
+                    .then(response => response.json())
+                    .then(result => {
+                        // API返回分页格式，数据在result.data中
+                        const data = result.data || result;
+                        const item = data.find(d => d[primaryKeyField] == id);
+                        if (item) {
+                            // 生成表单字段
+                            const formFields = document.getElementById('formFields');
+                            formFields.innerHTML = '';
+                            
+                            tableStructure.forEach(field => {
+                                const formGroup = document.createElement('div');
+                                formGroup.className = 'form-group';
+                                
+                                const label = document.createElement('label');
+                                label.htmlFor = `edit${field.field.charAt(0).toUpperCase() + field.field.slice(1)}`;
+                                label.textContent = field.comment && field.comment.trim() ? field.comment : field.field;
+                                if (field.null === 'NO' && field.default === null) {
+                                    label.textContent += ' *';
+                                }
+                                
+                                const input = document.createElement('input');
+                                input.type = 'text';
+                                input.id = `edit${field.field.charAt(0).toUpperCase() + field.field.slice(1)}`;
+                                input.value = item[field.field] !== undefined ? item[field.field] : '';
+                                if (field.null === 'NO' && field.default === null) {
+                                    input.required = true;
+                                }
+                                
+                                formGroup.appendChild(label);
+                                formGroup.appendChild(input);
+                                formFields.appendChild(formGroup);
+                            });
+                            
+                            document.getElementById('editModal').classList.add('show');
+                        } else {
+                            showToast('未找到该记录', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('加载记录失败', 'error');
+                    });
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('show');
+        }
+
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!currentTable) return;
+
+            const id = document.getElementById('editId').value;
+            const primaryKeyField = document.getElementById('editId').dataset.primaryKeyField || 'id';
+            const data = {};
+
+            tableStructure.forEach(field => {
+                if (field.field === 'id' && field.extra.includes('auto_increment') && !id) {
+                    return;
+                }
+                const inputId = `edit${field.field.charAt(0).toUpperCase() + field.field.slice(1)}`;
+                const input = document.getElementById(inputId);
+                if (input) {
+                    data[field.field] = input.value;
+                }
+            });
+
+            if (id) {
+                data.primaryKeyField = primaryKeyField;
+            }
+
+            const fieldOrder = tableStructure.map(f => f.field);
+            const url = id ? `/api/table/${currentTable}/data/${id}?database=${encodeURIComponent(currentDatabase)}` : `/api/table/${currentTable}/data`;
+            const method = id ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({...data, database: currentDatabase, fieldOrder: fieldOrder})
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    closeModal();
+                    loadTableData(currentTable);
+                    showToast(result.message, 'success');
+                } else {
+                    showToast(result.message || '操作失败', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('操作失败', 'error');
+            });
+        });
+
+        function deleteRecord(id, primaryKeyField = 'id') {
+            if (!currentTable) return;
+            
+            // 使用CSS确认弹窗
+            showConfirmModal(
+                '确认删除',
+                '确定要删除这条记录吗？此操作无法撤销。',
+                function() {
+                    // 用户确认后的回调
+                    fetch(`/api/table/${currentTable}/data/${id}?database=${encodeURIComponent(currentDatabase)}&primaryKeyField=${encodeURIComponent(primaryKeyField)}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            loadTableData(currentTable);
+                            showToast(result.message, 'success');
+                        } else {
+                            showToast(result.message || '删除失败', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('删除失败', 'error');
+                    });
+                }
+            );
+        }
+
+        function toggleFieldMenu(menuId) {
+            // 先关闭所有其他菜单
+            document.querySelectorAll('[id^="menu_"]').forEach(menu => {
+                if (menu.id !== menuId) {
+                    menu.style.display = 'none';
+                }
+            });
+            
+            // 切换当前菜单
+            const menu = document.getElementById(menuId);
+            if (menu) {
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        // 点击页面其他地方关闭菜单
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('[id^="menu_"]') && !event.target.closest('[onclick*="toggleFieldMenu"]') && !event.target.closest('[onclick*="sortTable"]') && !event.target.closest('[onclick*="openFilterModal"]')) {
+                document.querySelectorAll('[id^="menu_"]').forEach(menu => {
+                    menu.style.display = 'none';
+                });
+            }
+        });
+
+        // 分页相关函数
+        function updatePagination(totalRecords, totalPages) {
+            const paginationInfo = document.getElementById('paginationInfo');
+            const prevPageBtn = document.getElementById('prevPage');
+            const nextPageBtn = document.getElementById('nextPage');
+            const paginationContainer = document.getElementById('paginationContainer');
+            
+            paginationInfo.textContent = `第 ${currentPage}/${totalPages} 页`;
+            
+            prevPageBtn.disabled = currentPage <= 1;
+            nextPageBtn.disabled = currentPage >= totalPages;
+            
+            // 始终显示分页容器（包含每页条数选择器）
+            paginationContainer.style.display = 'flex';
+        }
+
+        function changePageSize(newSize) {
+            pageSize = parseInt(newSize);
+            currentPage = 1;
+            
+            // 重新从服务端获取数据
+            if (currentTable) {
+                loadTableDataWithPagination(currentTable, 1);
+            }
+        }
+
+        function changePage(page) {
+            if (page < 1 || page > totalPages) {
+                return;
+            }
+            
+            currentPage = page;
+            
+            // 从服务端获取对应页的数据
+            if (currentTable) {
+                loadTableDataWithPagination(currentTable, page);
+            }
+        }
+
+        function sortTable(field, order) {
+            currentSortField = field;
+            currentSortOrder = order;
+            
+            const sortedData = [...currentData].sort((a, b) => {
+                let valA = a[field] || '';
+                let valB = b[field] || '';
+                
+                if (valA < valB) return order === 'asc' ? -1 : 1;
+                if (valA > valB) return order === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            currentData = sortedData;
+            renderTableData(sortedData);
+        }
+
+        function openFilterModal(field) {
+            const fieldInfo = tableStructure.find(f => f.field === field);
+            const fieldName = fieldInfo ? (fieldInfo.comment && fieldInfo.comment.trim() ? fieldInfo.comment : fieldInfo.field) : field;
+            
+            // 检查是否已有该字段的过滤条件
+            const existingCondition = filterConditions.find(cond => cond.field === field);
+            
+            document.getElementById('filterFieldName').textContent = fieldName;
+            document.getElementById('filterField').value = existingCondition ? existingCondition.value : '';
+            // 存储当前正在编辑的字段
+            document.getElementById('filterModal').dataset.field = field;
+            document.getElementById('filterModal').classList.add('show');
+        }
+
+        function applyFilterFromModal() {
+            const field = document.getElementById('filterModal').dataset.field;
+            const filterValue = document.getElementById('filterField').value;
+            
+            // 移除该字段的现有条件
+            filterConditions = filterConditions.filter(cond => cond.field !== field);
+            
+            // 如果有过滤值，添加新条件
+            if (filterValue.trim()) {
+                filterConditions.push({ field, value: filterValue.trim() });
+            }
+            
+            applyFilter();
+            closeFilterModal();
+        }
+
+        function closeFilterModal() {
+            document.getElementById('filterModal').classList.remove('show');
+        }
+
+        function applyFilter() {
+            if (filterConditions.length === 0) {
+                renderTableData(currentData);
+                document.getElementById('recordCount').textContent = `记录数量：${currentData.length}`;
+                document.getElementById('filterConditions').textContent = '';
+                return;
+            }
+            
+            const filteredData = currentData.filter(item => {
+                // 检查是否满足所有过滤条件
+                return filterConditions.every(condition => {
+                    const fieldValue = String(item[condition.field] || '').toLowerCase();
+                    const filterValue = condition.value.toLowerCase();
+                    return fieldValue.includes(filterValue);
+                });
+            });
+            
+            // 构建过滤条件显示文本
+            const filterText = filterConditions.map(condition => {
+                const fieldInfo = tableStructure.find(f => f.field === condition.field);
+                const fieldName = fieldInfo ? (fieldInfo.comment && fieldInfo.comment.trim() ? fieldInfo.comment : fieldInfo.field) : condition.field;
+                return `${fieldName}:${condition.value}`;
+            }).join(' & ');
+            
+            // 更新记录数量显示
+            document.getElementById('recordCount').textContent = `从${currentData.length}条记录中，过滤"${filterText}"，记录 ${filteredData.length} 条`;
+            document.getElementById('filterConditions').textContent = '';
+            
+            // 将过滤后的数据保存到临时变量用于分页
+            window.filteredDataForPagination = filteredData;
+            renderTableData(filteredData);
+        }
+
+        function clearFilter() {
+            filterConditions = [];
+            document.getElementById('filterConditions').textContent = '';
+            renderTableData(currentData);
+        }
+
+        function renderTableData(data) {
+            const tbody = document.getElementById('tableBody');
+            const emptyState = document.getElementById('emptyState');
+            const table = document.getElementById('dataTable');
+            const recordCountElement = document.getElementById('recordCount');
+            const paginationContainer = document.getElementById('paginationContainer');
+
+            if (data.length === 0) {
+                table.style.display = 'none';
+                emptyState.style.display = 'block';
+                paginationContainer.style.display = 'none';
+            } else {
+                table.style.display = 'table';
+                emptyState.style.display = 'none';
+                
+                // 计算当前页的起始行号
+                const startIndex = (currentPage - 1) * pageSize;
+                
+                tbody.innerHTML = data.map((item, index) => {
+                    const row = document.createElement('tr');
+                    
+                    // 查找表的主键字段或唯一标识字段
+                    let primaryKeyField = null;
+                    let uniqueField = null;
+                    
+                    // 先查找主键
+                    tableStructure.forEach(field => {
+                        if (field.key === 'PRI') {
+                            primaryKeyField = field.field;
+                        } else if (field.key === 'UNI' && !uniqueField) {
+                            uniqueField = field.field;
+                        }
+                    });
+                    
+                    // 如果没有主键，使用唯一索引字段
+                    if (!primaryKeyField) {
+                        primaryKeyField = uniqueField;
+                    }
+                    
+                    // 如果还是没有，使用第一个字段作为标识
+                    if (!primaryKeyField && tableStructure.length > 0) {
+                        primaryKeyField = tableStructure[0].field;
+                    }
+                    
+                    // 获取主键值
+                    const primaryKeyValue = primaryKeyField && item[primaryKeyField] !== undefined ? item[primaryKeyField] : '';
+                    
+                    // 添加行号（显示全局行号）
+                    const rowNumberTd = document.createElement('td');
+                    rowNumberTd.textContent = startIndex + index + 1;
+                    rowNumberTd.style.textAlign = 'center';
+                    rowNumberTd.style.fontSize = '12px';
+                    rowNumberTd.style.color = '#666';
+                    row.appendChild(rowNumberTd);
+                    
+                    const checkboxTd = document.createElement('td');
+                    checkboxTd.innerHTML = `<input type="checkbox" class="record-checkbox" value="${primaryKeyValue}" data-primary-key="${primaryKeyField}">`;
+                    row.appendChild(checkboxTd);
+                    
+                    tableStructure.forEach(field => {
+                        const td = document.createElement('td');
+                        const value = item[field.field] || '';
+                        
+                        // 检查是否是状态字段
+                        if (value === 'stat_on' || value === 'stat_off') {
+                            // 创建状态灯
+                            const statusLight = document.createElement('span');
+                            statusLight.style.display = 'inline-flex';
+                            statusLight.style.alignItems = 'center';
+                            statusLight.style.gap = '8px';
+                            
+                            // 添加状态指示灯
+                            const light = document.createElement('span');
+                            light.style.width = '10px';
+                            light.style.height = '10px';
+                            light.style.borderRadius = '50%';
+                            light.style.backgroundColor = value === 'stat_on' ? '#28a745' : '#dc3545';
+                            
+                            // 添加状态文本
+                            const text = document.createElement('span');
+                            text.textContent = value === 'stat_on' ? 'on' : 'off';
+                            
+                            statusLight.appendChild(light);
+                            statusLight.appendChild(text);
+                            td.appendChild(statusLight);
+                        } else {
+                            // 普通字段直接显示值
+                            td.textContent = value;
+                        }
+                        
+                        row.appendChild(td);
+                    });
+                    
+                    const actionTd = document.createElement('td');
+                    actionTd.className = 'actions';
+                    
+                    if (primaryKeyField && item[primaryKeyField] !== undefined) {
+                        actionTd.innerHTML = `
+                            <button class="btn btn-primary btn-sm" onclick="editRecord('${item[primaryKeyField]}', '${primaryKeyField}')">编辑</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteRecord('${item[primaryKeyField]}', '${primaryKeyField}')">删除</button>
+                        `;
+                    } else {
+                        // 没有可用于标识的字段，禁用编辑和删除功能
+                        actionTd.innerHTML = `
+                            <button class="btn btn-primary btn-sm" disabled title="没有主键或唯一标识字段">编辑</button>
+                            <button class="btn btn-danger btn-sm" disabled title="没有主键或唯一标识字段">删除</button>
+                        `;
+                    }
+                    row.appendChild(actionTd);
+                    
+                    return row.outerHTML;
+                }).join('');
+            }
+        }
+
+        window.onclick = function(event) {
+            const editModal = document.getElementById('editModal');
+            if (event.target === editModal) {
+                closeModal();
+            }
+            
+            const filterModal = document.getElementById('filterModal');
+            if (event.target === filterModal) {
+                closeFilterModal();
+            }
+            
+            const sqlModal = document.getElementById('sqlModal');
+            if (event.target === sqlModal) {
+                closeSqlModal();
+            }
+        }
+
+        // 加载站点配置函数
+        async function loadSiteConfig() {
+            try {
+                const response = await fetch('/api/site-config');
+                const config = await response.json();
+
+                if (config.site && config.site.name) {
+                    const siteName = config.site.name;
+                    document.getElementById('siteTitle').textContent = siteName;
+                    document.getElementById('siteHeading').textContent = siteName + ' 管理';
+                }
+
+                if (config.site && config.site.logo) {
+                    const faviconUrl = config.site.logo + '?v=' + Date.now();
+                    const existingFavicon = document.getElementById('siteFavicon');
+                    if (existingFavicon) {
+                        existingFavicon.href = faviconUrl;
+                    } else {
+                        const link = document.createElement('link');
+                        link.id = 'siteFavicon';
+                        link.rel = 'icon';
+                        link.href = faviconUrl;
+                        link.type = 'image/png';
+                        document.head.appendChild(link);
+                    }
+                }
+            } catch (error) {
+                console.error('加载站点配置失败:', error);
+            }
+        }
+
+        // 初始化加载站点配置
+        window.addEventListener('load', loadSiteConfig);
+
+        // 初始化加载数据库列表
+        loadDatabases();
+
+        // 窗口大小改变时检查滚动按钮状态
+        window.addEventListener('resize', checkScrollButtons);
+
+        // 数据库标签滚动时检查按钮状态
+        document.getElementById('databaseTabs').addEventListener('scroll', checkScrollButtons);
+
+        // SQL执行函数
+        function executeSql() {
+            const sql = document.getElementById('sqlScript').value.trim();
+            if (!sql) {
+                showToast('请输入SQL脚本', 'warning');
+                return;
+            }
+
+            const logElement = document.getElementById('sqlLog');
+            logElement.innerHTML = '正在执行SQL...\n';
+
+            fetch('/api/execute-sql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ sql: sql, database: currentDatabase })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    logElement.innerHTML += '执行成功！\n';
+                    if (result.results) {
+                        // 多条SQL语句的结果
+                        result.results.forEach((res, index) => {
+                            logElement.innerHTML += `语句 ${index + 1} 结果：\n` + JSON.stringify(res.data, null, 2) + '\n';
+                        });
+                    } else if (result.data) {
+                        // 单条查询语句的结果
+                        logElement.innerHTML += '结果：\n' + JSON.stringify(result.data, null, 2) + '\n';
+                    }
+                    if (result.affected_rows) {
+                        logElement.innerHTML += `影响行数：${result.affected_rows}\n`;
+                    }
+                } else {
+                    logElement.innerHTML += '执行失败：' + result.message + '\n';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                logElement.innerHTML += '执行出错：' + error.message + '\n';
+            });
+        }
+
+        function clearSql() {
+            document.getElementById('sqlScript').value = '';
+            document.getElementById('sqlLog').innerHTML = '';
+        }
+
+        function openSqlModal() {
+            document.getElementById('sqlModal').classList.add('show');
+        }
+
+        function closeSqlModal() {
+            document.getElementById('sqlModal').classList.remove('show');
+        }
+
+        // 全选/取消全选
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.record-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        }
+
+        // 批量删除
+        function batchDelete() {
+            if (!currentTable) return;
+
+            const checkboxes = document.querySelectorAll('.record-checkbox:checked');
+
+            if (checkboxes.length === 0) {
+                showToast('请选择要删除的记录', 'warning');
+                return;
+            }
+
+            const primaryKeyField = checkboxes[0].dataset.primaryKey || 'id';
+            const selectedIds = Array.from(checkboxes).map(checkbox => checkbox.value);
+            const fieldOrder = tableStructure.map(f => f.field);
+
+            showConfirmModal('确认删除', `确定要删除选中的 ${selectedIds.length} 条记录吗？`, function() {
+                fetch(`/api/table/${currentTable}/data/batch?database=${encodeURIComponent(currentDatabase)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        database: currentDatabase,
+                        primaryKeyField: primaryKeyField,
+                        ids: selectedIds,
+                        fieldOrder: fieldOrder
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        loadTableData(currentTable);
+                        showToast(result.message, 'success');
+                    } else {
+                        showToast(result.message || '删除失败', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('删除失败', 'error');
+                });
+            });
+        }
+
+        // 刷新数据
+        function refreshData() {
+            // 显示加载动画
+            document.getElementById('refreshIcon').style.display = 'none';
+            document.getElementById('refreshSpinner').style.display = 'block';
+            document.getElementById('refreshButton').disabled = true;
+            
+            // 清除过滤条件
+            clearFilter();
+            
+            if (currentTable) {
+                // 已选择表，刷新表数据
+                loadTableData(currentTable);
+                // 模拟加载延迟，实际项目中可以根据实际情况调整
+                setTimeout(() => {
+                    // 隐藏加载动画
+                    document.getElementById('refreshIcon').style.display = 'inline';
+                    document.getElementById('refreshSpinner').style.display = 'none';
+                    document.getElementById('refreshButton').disabled = false;
+                }, 500);
+            } else if (currentDatabase) {
+                // 未选择表但已选择数据库，刷新表列表
+                loadTables(currentDatabase);
+                setTimeout(() => {
+                    document.getElementById('refreshIcon').style.display = 'inline';
+                    document.getElementById('refreshSpinner').style.display = 'none';
+                    document.getElementById('refreshButton').disabled = false;
+                }, 500);
+            } else {
+                // 未选择数据库，刷新数据库列表
+                loadDatabases();
+                setTimeout(() => {
+                    document.getElementById('refreshIcon').style.display = 'inline';
+                    document.getElementById('refreshSpinner').style.display = 'none';
+                    document.getElementById('refreshButton').disabled = false;
+                }, 500);
+            }
+        }
+
+
+
+        // 设置相关函数
+        async function openSettingsModal() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+
+                document.getElementById('settingSiteName').value = config.site.name || '';
+                document.getElementById('settingSiteLogo').value = config.site.logo || '';
+                document.getElementById('settingLoginUsername').value = config.login.username || '';
+                document.getElementById('settingLoginPassword').value = config.login.password || '';
+                document.getElementById('settingDbHost').value = config.database.host || '';
+                document.getElementById('settingDbPort').value = config.database.port || '';
+                document.getElementById('settingDbUser').value = config.database.user || '';
+                document.getElementById('settingDbPassword').value = config.database.password || '';
+                document.getElementById('settingHttpPort').value = config.server.http_port || '';
+                document.getElementById('settingHttpsPort').value = config.server.https_port || '';
+                document.getElementById('settingSslCert').value = config.server.ssl_cert || '';
+                document.getElementById('settingSslKey').value = config.server.ssl_key || '';
+                document.getElementById('settingDefaultDatabase').value = config.page?.default_database || '';
+                document.getElementById('settingDefaultTable').value = config.page?.default_table || '';
+                document.getElementById('settingDefaultPageSize').value = config.page?.default_page_size || '10';
+
+                originalServerConfig = { ...config.server };
+
+                document.getElementById('settingsModal').classList.add('show');
+            } catch (error) {
+                console.error('加载配置失败:', error);
+                showToast('加载配置失败', 'error');
+            }
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('show');
+        }
+
+        function switchSettingsTab(tabName) {
+            document.querySelectorAll('.settings-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.settings-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Settings').style.display = 'block';
+        }
+
+        function openHistoryModal() {
+            loadHistoryData();
+            document.getElementById('historyModal').classList.add('show');
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.remove('show');
+        }
+
+        function loadHistoryData() {
+            fetch('/api/history')
+                .then(response => response.json())
+                .then(result => {
+                    const tbody = document.getElementById('historyTableBody');
+                    tbody.innerHTML = '';
+                    if (result.data && result.data.length > 0) {
+                        result.data.forEach(record => {
+                            const tr = document.createElement('tr');
+                            let recordInfo = `${record.database}.${record.table}`;
+                            if (record.record_data) {
+                                if (typeof record.record_data === 'object') {
+                                    let orderedData = record.record_data;
+                                    if (record.field_order && Array.isArray(record.field_order)) {
+                                        const orderedEntries = record.field_order.map(field => [field, record.record_data[field]]);
+                                        orderedData = orderedEntries;
+                                    } else {
+                                        orderedData = Object.entries(record.record_data);
+                                    }
+                                    const dataStr = orderedData.map(([k, v]) => `${k}=${v}`).join(', ');
+                                    recordInfo += ` [${dataStr}]`;
+                                } else {
+                                    recordInfo += ` [${record.record_data}]`;
+                                }
+                            }
+                            tr.innerHTML = `
+                                <td class="history-col-time">${record.timestamp}</td>
+                                <td class="history-col-status"><span class="history-status success">${record.status}</span></td>
+                                <td class="history-col-action">${record.action_type}</td>
+                                <td class="history-col-record">${recordInfo}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="4" class="history-empty">暂无操作记录</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading history:', error);
+                    showToast('加载历史记录失败', 'error');
+                });
+        }
+
+        function exportHistory() {
+            window.location.href = '/api/history/export';
+        }
+
+        function clearHistory() {
+            showConfirmModal(
+                '确认清空',
+                '确定要清空所有历史记录吗？此操作无法撤销。',
+                function() {
+                    fetch('/api/history/clear', { method: 'POST' })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                showToast('历史记录已清空', 'success');
+                                loadHistoryData();
+                            } else {
+                                showToast(result.message || '清空失败', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error clearing history:', error);
+                            showToast('清空失败', 'error');
+                        });
+                }
+            );
+        }
+
+        async function saveSettings() {
+            const config = {
+                site: {
+                    name: document.getElementById('settingSiteName').value,
+                    logo: document.getElementById('settingSiteLogo').value
+                },
+                login: {
+                    username: document.getElementById('settingLoginUsername').value,
+                    password: document.getElementById('settingLoginPassword').value
+                },
+                database: {
+                    host: document.getElementById('settingDbHost').value,
+                    port: document.getElementById('settingDbPort').value,
+                    user: document.getElementById('settingDbUser').value,
+                    password: document.getElementById('settingDbPassword').value
+                },
+                server: {
+                    http_port: document.getElementById('settingHttpPort').value,
+                    https_port: document.getElementById('settingHttpsPort').value,
+                    ssl_cert: document.getElementById('settingSslCert').value,
+                    ssl_key: document.getElementById('settingSslKey').value
+                },
+                page: {
+                    default_database: document.getElementById('settingDefaultDatabase').value,
+                    default_table: document.getElementById('settingDefaultTable').value,
+                    default_page_size: document.getElementById('settingDefaultPageSize').value
+                }
+            };
+
+            const serverChanged = originalServerConfig && (
+                config.server.http_port !== String(originalServerConfig.http_port) ||
+                config.server.https_port !== String(originalServerConfig.https_port) ||
+                config.server.ssl_cert !== originalServerConfig.ssl_cert ||
+                config.server.ssl_key !== originalServerConfig.ssl_key
+            );
+
+            const dbHost = config.database.host.trim();
+            const dbPort = config.database.port.toString().trim();
+            const dbUser = config.database.user.trim();
+            
+            const hasHost = !!dbHost;
+            const hasPort = !!dbPort;
+            const hasUser = !!dbUser;
+            
+            if (hasHost !== hasPort || hasHost !== hasUser) {
+                showToast('数据库主机、数据库端口、数据库用户名必须同时存在或同时不存在值', 'error');
+                return;
+            }
+
+            try {
+                if (serverChanged) {
+                    showToast('正在验证服务器设置...', 'info');
+                    
+                    const validateResponse = await fetch('/api/validate-server-settings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ server: config.server })
+                    });
+
+                    const validateResult = await validateResponse.json();
+                    
+                    if (!validateResult.success) {
+                        const errorMsg = validateResult.errors.join('; ');
+                        showToast('验证失败: ' + errorMsg, 'error');
+                        return;
+                    }
+                    
+                    if (validateResult.warnings && validateResult.warnings.length > 0) {
+                        const warningMsg = validateResult.warnings.join('; ');
+                        showToast('警告: ' + warningMsg, 'warning');
+                    }
+                }
+
+                const response = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(config)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    if (serverChanged) {
+                        const newHttpPort = config.server.http_port;
+                        try {
+                            closeSettingsModal();
+                            showToast(`应用正在重启中，请稍候...`, 'warning');
+                            const restartResponse = await fetch('/api/restart', { method: 'POST' });
+                            const restartResult = await restartResponse.json();
+                            if (restartResult.success) {
+                                setTimeout(() => {
+                                    window.location.href = `http://localhost:${newHttpPort}`;
+                                }, 3000);
+                            } else {
+                                showToast('重启请求失败', 'error');
+                            }
+                        } catch (err) {
+                            console.error('重启失败:', err);
+                            showToast('重启请求失败: ' + err.message, 'error');
+                        }
+                    } else {
+                        closeSettingsModal();
+                        showToast('设置保存成功', 'success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 500);
+                    }
+                } else {
+                    showToast('保存失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存配置失败:', error);
+                showToast('保存配置失败', 'error');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icons = {
+                success: '✓',
+                error: '✗',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+            
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || icons.info}</span>
+                <p class="toast-message">${message}</p>
+                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.style.animation = 'slideOut 0.3s ease forwards';
+                    setTimeout(() => {
+                        if (toast.parentElement) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }
+            }, 3000);
+        }
+
+        window.addEventListener('click', function(event) {
+            const settingsModal = document.getElementById('settingsModal');
+            if (event.target === settingsModal) {
+                closeSettingsModal();
+            }
+        });
+    </script>
+</body>
+</html>
